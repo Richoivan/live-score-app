@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🏆 Live Score</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      padding: 40px 16px;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: white;
+    }
+
+    /* ── Header ── */
+    .header { text-align: center; margin-bottom: 40px; }
+    .header h1 { font-size: clamp(2rem, 6vw, 3rem); font-weight: 900; letter-spacing: -1px; }
+    .header p  { color: #c4b5fd; margin-top: 6px; font-size: .95rem; letter-spacing: .2em; text-transform: uppercase; font-weight: 600; }
+    .header-line {
+      margin: 8px auto 0;
+      width: 96px; height: 4px; border-radius: 9999px;
+      background: linear-gradient(to right, #a78bfa, #f472b6);
+    }
+
+    /* ── Board ── */
+    #board { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+
+    /* ── Card ── */
+    .card {
+      position: relative;
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,.15);
+      background: rgba(255,255,255,.08);
+      backdrop-filter: blur(6px);
+      transition: transform .35s, border-color .35s, background .35s, box-shadow .35s;
+    }
+    .card.leading {
+      background: linear-gradient(135deg, rgba(74,222,128,.18), rgba(16,185,129,.18));
+      border: 2px solid #4ade80;
+      transform: scale(1.02);
+      box-shadow: 0 0 24px rgba(74,222,128,.25);
+    }
+
+    /* ── Leading badge ── */
+    .badge-top {
+      display: none;
+      position: absolute;
+      top: -14px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(to right, #4ade80, #10b981);
+      color: white; font-size: .7rem; font-weight: 700;
+      padding: 4px 14px; border-radius: 9999px;
+      white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,.3);
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+    .card.leading .badge-top { display: block; }
+    @keyframes pulse {
+      0%,100% { opacity:1; } 50% { opacity:.6; }
+    }
+
+    /* ── Card inner row ── */
+    .card-row { display: flex; align-items: center; gap: 16px; }
+
+    /* ── Rank badge ── */
+    .rank-badge {
+      flex-shrink: 0;
+      width: 56px; height: 56px;
+      border-radius: 12px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-weight: 900;
+      transition: background .35s, color .35s;
+    }
+    .rank-badge.r1 { background: #facc15; color: #713f12; }
+    .rank-badge.r2 { background: #cbd5e1; color: #334155; }
+    .rank-badge.r3 { background: #b45309; color: #fef3c7; }
+    .rank-badge .emoji { font-size: 1.4rem; line-height: 1; }
+    .rank-badge .label { font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; margin-top: 2px; }
+
+    /* ── Name input area ── */
+    .name-area { flex: 1; min-width: 0; }
+    .name-area input {
+      width: 100%;
+      background: transparent;
+      border: none; border-bottom: 2px solid rgba(255,255,255,.25);
+      color: white; font-size: 1.1rem; font-weight: 700;
+      padding: 4px 0; outline: none;
+      transition: border-color .2s;
+    }
+    .name-area input:focus { border-color: #a78bfa; }
+    .name-area input::placeholder { color: rgba(255,255,255,.35); }
+    .name-area small { color: rgba(255,255,255,.35); font-size: .7rem; margin-top: 2px; display: block; }
+
+    /* ── Score display ── */
+    .score-display {
+      font-size: 3rem; font-weight: 900;
+      width: 72px; text-align: right;
+      color: white; transition: color .35s;
+      font-variant-numeric: tabular-nums;
+    }
+    .card.leading .score-display { color: #86efac; }
+
+    /* ── Buttons row ── */
+    .btn-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+    .btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 20px; border-radius: 10px;
+      font-size: .85rem; font-weight: 700; cursor: pointer;
+      border: 1px solid transparent;
+      transition: background .15s, transform .1s, opacity .2s;
+    }
+    .btn:active { transform: scale(.93); }
+    .btn-minus {
+      background: rgba(239,68,68,.18); color: #fca5a5;
+      border-color: rgba(239,68,68,.35);
+    }
+    .btn-minus:hover { background: rgba(239,68,68,.35); color: #fecaca; }
+    .btn-minus:disabled { opacity: .3; cursor: not-allowed; transform: none; }
+    .btn-plus {
+      background: rgba(167,139,250,.25); color: #ddd6fe;
+      border-color: rgba(167,139,250,.45);
+    }
+    .btn-plus:hover { background: rgba(167,139,250,.45); color: white; }
+
+    /* ── Reset section ── */
+    .reset-section { max-width: 640px; margin: 32px auto 0; text-align: center; }
+    .btn-reset {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 32px; border-radius: 14px; border: none; cursor: pointer;
+      background: linear-gradient(to right, #dc2626, #e11d48);
+      color: white; font-size: 1rem; font-weight: 700;
+      box-shadow: 0 4px 18px rgba(220,38,38,.3);
+      transition: filter .2s, transform .15s, box-shadow .2s;
+    }
+    .btn-reset:hover  { filter: brightness(1.15); box-shadow: 0 6px 22px rgba(220,38,38,.45); }
+    .btn-reset:active { transform: scale(.95); }
+    .hint { color: rgba(255,255,255,.25); font-size: .75rem; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <h1>🏆 Live Score</h1>
+    <p>Papan Skor Real-Time</p>
+    <div class="header-line"></div>
+  </div>
+
+  <!-- Scoreboard -->
+  <div id="board"></div>
+
+  <!-- Reset -->
+  <div class="reset-section">
+    <button class="btn-reset" onclick="resetScores()">🔄 Reset Semua Skor</button>
+    <p class="hint">Skor diperbarui secara real-time • Tie = Rank sama</p>
+  </div>
+
+  <script>
+    // ─── State ───────────────────────────────────────────────────────────────
+    const teams = [
+      { id: 1, name: "Tim Garuda",   score: 0 },
+      { id: 2, name: "Tim Elang",    score: 0 },
+      { id: 3, name: "Tim Rajawali", score: 0 },
+    ];
+
+    const rankEmoji = { 1: "🥇", 2: "🥈", 3: "🥉" };
+    const rankClass = { 1: "r1",  2: "r2",  3: "r3"  };
+
+    // ─── Logic ───────────────────────────────────────────────────────────────
+    function updateName(id, value) {
+      const team = teams.find(t => t.id === id);
+      if (team) { team.name = value; render(); }
+    }
+
+    function updateScore(id, delta) {
+      const team = teams.find(t => t.id === id);
+      if (!team) return;
+      const next = team.score + delta;
+      team.score = next < 0 ? 0 : next;
+      render();
+    }
+
+    function resetScores() {
+      teams.forEach(t => t.score = 0);
+      render();
+    }
+
+    function calcRankings() {
+      const sorted = [...teams].sort((a, b) => b.score - a.score);
+      const map = {};
+      sorted.forEach((team, i) => {
+        const prev = sorted[i - 1];
+        map[team.id] = i === 0 ? 1
+          : team.score === prev.score ? map[prev.id]
+          : i + 1;
+      });
+      return map;
+    }
+
+    function getMaxScore() {
+      return Math.max(...teams.map(t => t.score));
+    }
+
+    // ─── Render ──────────────────────────────────────────────────────────────
+    function render() {
+      const rankings = calcRankings();
+      const maxScore = getMaxScore();
+      const board    = document.getElementById("board");
+
+      // Sort cards by rank so board order reflects ranking
+      const sorted = [...teams].sort((a, b) => rankings[a.id] - rankings[b.id]);
+
+      board.innerHTML = sorted.map(team => {
+        const rank    = rankings[team.id];
+        const leading = team.score === maxScore && maxScore > 0;
+        const rClass  = rankClass[rank] ?? "r3";
+
+        return `
+          <div class="card${leading ? " leading" : ""}">
+            <div class="badge-top">🔥 Skor Tertinggi</div>
+
+            <div class="card-row">
+              <!-- Rank badge -->
+              <div class="rank-badge ${rClass}">
+                <span class="emoji">${rankEmoji[rank] ?? "#" + rank}</span>
+                <span class="label">Rank ${rank}</span>
+              </div>
+
+              <!-- Name input -->
+              <div class="name-area">
+                <input
+                  type="text"
+                  value="${escapeAttr(team.name)}"
+                  maxlength="30"
+                  placeholder="Nama Tim..."
+                  oninput="updateName(${team.id}, this.value)"
+                />
+                <small>Klik untuk edit nama</small>
+              </div>
+
+              <!-- Score -->
+              <div class="score-display">${team.score}</div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="btn-row">
+              <button class="btn btn-minus"
+                onclick="updateScore(${team.id}, -1)"
+                ${team.score === 0 ? "disabled" : ""}>
+                <span style="font-size:1.1rem;line-height:1">−</span> 1
+              </button>
+              <button class="btn btn-plus"
+                onclick="updateScore(${team.id}, 1)">
+                <span style="font-size:1.1rem;line-height:1">+</span> 1
+              </button>
+            </div>
+          </div>`;
+      }).join("");
+    }
+
+    // Prevent XSS in attribute values
+    function escapeAttr(str) {
+      return str.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+    }
+
+    // ─── Init ────────────────────────────────────────────────────────────────
+    render();
+  </script>
+</body>
+</html>
