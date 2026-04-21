@@ -157,30 +157,7 @@
       gap: 16px;
     }
 
-    .logo {
-      width: 48px;
-      height: 48px;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      flex-shrink: 0;
-    }
 
-    .logo::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, var(--cyan), var(--violet));
-      clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
-      filter: drop-shadow(0 0 15px var(--cyan-g));
-    }
-
-    .logo span {
-      position: relative;
-      z-index: 1;
-    }
 
     /* Live dot indicator */
     .live-pill {
@@ -727,18 +704,12 @@
   <!-- ═══ HEADER ═══ -->
   <header>
     <div class="h-left">
-      <div class="logo"><span>⚡</span></div>
       <div class="live-pill">
         <div class="live-dot"></div>Live Now
       </div>
 
     </div>
     <div class="h-right">
-      <img src="Frame 48097164.png" style="height:32px;">
-      <div class="sponsor-pill">
-        <img src="GDG Logo Cloud.png" style="height:32px;">
-        <img src="WhatsApp_Image_2026-04-08_at_20.32.53-removebg-preview.png" style="height:32px;">
-      </div>
     </div>
   </header>
 
@@ -747,15 +718,7 @@
     <div class="podium" id="podium"></div>
   </div>
 
-  <!-- ═══ TICKER ═══ -->
-  <div class="ticker">
-    <div class="t-label">
-      <div class="live-dot" style="width:6px;height:6px"></div>Live Standings
-    </div>
-    <div class="t-scroll">
-      <div class="t-txt" id="tickerTxt"></div>
-    </div>
-  </div>
+
 
   <script>
     /* ═══════════════════════════════════════════════
@@ -927,18 +890,10 @@
       prevRanks = [...ranks];
 
       /* Update ticker */
-      updateTicker(ranks);
+      // updateTicker(ranks);
     }
 
-    /* ═══════════════════════════════════════════════
-       TICKER
-    ═══════════════════════════════════════════════ */
-    function updateTicker(ranks) {
-      const order = teams.map((_, i) => i).sort((a, b) => ranks[a] - ranks[b]);
-      const txt = order.map(i => `${MDL[ranks[i]] || '🏅'} ${teams[i].name}: ${teams[i].score} pts`).join('   ·   ');
-      const el = document.getElementById('tickerTxt');
-      el.textContent = txt + '      ·      ' + txt;
-    }
+    // Ticker removed
 
     /* ═══════════════════════════════════════════════
        STORAGE LISTENER
