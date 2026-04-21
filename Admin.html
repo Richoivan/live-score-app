@@ -616,12 +616,13 @@
       color: var(--neon-green);
       box-shadow: 0 0 14px rgba(0, 255, 136, .09);
     }
+
     .btn-add:hover {
       background: linear-gradient(135deg, rgba(0, 255, 136, .22), rgba(0, 160, 50, .15));
       border-color: rgba(0, 255, 136, .7);
       box-shadow: 0 0 30px rgba(0, 255, 136, .26);
     }
-    
+
     .btn-del {
       position: absolute;
       top: 14px;
@@ -639,6 +640,7 @@
       cursor: pointer;
       transition: all 0.2s;
     }
+
     .btn-del:hover {
       background: rgba(255, 45, 85, .25);
       border-color: rgba(255, 45, 85, .6);
@@ -675,7 +677,6 @@
     </div>
     <div class="h-right">
       <div class="h-title">Live Score Competition</div>
-      <div class="h-sub">GDG Cloud Surabaya</div>
     </div>
   </header>
 
@@ -764,10 +765,10 @@
        RANKING
     ═══════════════════════════════════════════════ */
     function hitungRanking() {
-      const indexed = teams.map((t, i) => ({ 
-        score: t.score, 
+      const indexed = teams.map((t, i) => ({
+        score: t.score,
         lastUpdate: t.lastUpdate || 0, // Fallback for old data
-        i 
+        i
       }));
       indexed.sort((a, b) => {
         if (b.score !== a.score) return b.score - a.score;
@@ -815,7 +816,7 @@
     }
 
     function hapusTim(i) {
-      if(confirm(`Yakin ingin menghapus ${teams[i].name}?`)) {
+      if (confirm(`Yakin ingin menghapus ${teams[i].name}?`)) {
         teams.splice(i, 1);
         save();
         renderAdmin();
@@ -834,7 +835,7 @@
     function renderAdmin(animIdx = -1) {
       const ranks = hitungRanking();
       const maxS = teams.length > 0 ? Math.max(...teams.map(t => t.score)) : 0;
-      
+
       document.getElementById('teamCountLbl').innerText = `${teams.length} Teams Active`;
 
       document.getElementById('teamsGrid').innerHTML = teams.map((t, i) => {
